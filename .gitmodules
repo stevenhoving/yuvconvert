@@ -1,0 +1,3 @@
+[submodule "dep/static_math"]
+	path = dep/static_math
+	url = https://github.com/stevenhoving/static_math.git

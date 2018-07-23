@@ -21,23 +21,22 @@
 
 #pragma once
 
-namespace yuvconvert
+#include "simd_utility.h"
+#include <cstdint>
+
+__packed_struct(bgr)
 {
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
+    uint8_t b, g, r;
+};
+__packed_struct_end
 
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
-
-    enum class simd_mode
+__packed_struct(bgra)
+{
+    operator uint32_t() const noexcept
     {
-        plain_c,
-        ssse3
-    };
+        return *(uint32_t *)this;
+    }
 
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
-
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
-} // namespace yuvconvert
+    uint8_t b, g, r, a;
+};
+__packed_struct_end

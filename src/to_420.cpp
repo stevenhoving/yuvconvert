@@ -26,6 +26,9 @@
 
 namespace yuvconvert
 {
+using bgrx_row_to_y_row = void(const unsigned char *src, unsigned char *dst, const int width);
+using bgrx_row_to_yuv_row = void(const unsigned char *src, unsigned char *dst_y, unsigned char *dst_u, unsigned char *dst_v, const int width);
+
 
 void bgra_to_420(unsigned char *destination[3], const int dst_stride[3],
                  const unsigned char *const source[3], const int width, const int height,
@@ -94,23 +97,18 @@ void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const un
     const auto u_stride = dst_stride[1];
     const auto v_stride = dst_stride[2];
 
-
-
-    //void(*ARGBToUVJRow)(const uint8* src_argb0, int src_stride_argb,
-        //uint8* dst_u, uint8* dst_v, int width) = ARGBToUVJRow_C;
-    //void(*ARGBToYJRow)(const uint8* src_argb, uint8* dst_yj, int width) =
-        //ARGBToYJRow_C;
-
-    using bgrx_row_to_y_row = void(const unsigned char *src, unsigned char *dst, const int width);
-    using bgrx_row_to_yuv_row = void(const unsigned char *src, unsigned char *dst_y, unsigned char *dst_u, unsigned char *dst_v, const int width);
-
-
-    //bgrx_row_to_yuv_row *yuv_row_converter = bgra_row_to_yuv_row_c;
-    //bgrx_row_to_y_row *y_row_converter = bgra_row_to_y_row_c;
-
-    bgrx_row_to_yuv_row *yuv_row_converter = bgra_row_to_yuv_row_ssse3;
-    bgrx_row_to_y_row *y_row_converter = bgra_row_to_y_row_ssse3;
-
+    bgrx_row_to_yuv_row *yuv_row_converter = nullptr;
+    bgrx_row_to_y_row *y_row_converter = nullptr;
+    if (mode == simd_mode::plain_c)
+    {
+        yuv_row_converter = bgr_row_to_yuv_row_c;
+        y_row_converter = bgr_row_to_y_row_c;
+    }
+    else if (mode == simd_mode::ssse3)
+    {
+        yuv_row_converter = bgr_row_to_yuv_row_ssse3;
+        y_row_converter = bgr_row_to_y_row_ssse3;
+    }
 
     for (int line = 0; line < height; line += 2)
     {
@@ -138,14 +136,27 @@ void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const u
     const auto u_stride = dst_stride[1];
     const auto v_stride = dst_stride[2];
 
+    bgrx_row_to_yuv_row *yuv_row_converter = nullptr;
+    bgrx_row_to_y_row *y_row_converter = nullptr;
+    if (mode == simd_mode::plain_c)
+    {
+        yuv_row_converter = bgra_row_to_yuv_row_c;
+        y_row_converter = bgra_row_to_y_row_c;
+    }
+    else if (mode == simd_mode::ssse3)
+    {
+        yuv_row_converter = bgra_row_to_yuv_row_ssse3;
+        y_row_converter = bgra_row_to_y_row_ssse3;
+    }
+
     for (int line = 0; line < height; line += 2)
     {
-        bgr_row_to_yuv_row_c(src, y, u, v, width);
+        yuv_row_converter(src, y, u, v, width);
         src += raw_stride;
         y += y_stride;
         u += u_stride;
         v += v_stride;
-        bgr_row_to_y_row_c(src, y, width);
+        y_row_converter(src, y, width);
         src += raw_stride;
         y += y_stride;
     }

@@ -18,49 +18,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_subdirectory(dep)
+include(Unittests)
 
-set(YUVCONVERT_SOURCE
-    src/to_420.cpp
-    src/to_420.h
-    src/to_420_c.cpp
-    src/to_420_c.h
-    src/to_420_ssse3.cpp
-    src/to_420_ssse3.h
-    src/simd_common.h
-    src/simd_debug.h
-    src/simd_utility.h
-    src/simd_vec.h
-    src/yuv_pixel_type.h
-    include/yuvconvert/yuvconvert_common.h
+add_unit_test_suite(
+    TARGET test_yuvconvert
+    SOURCES
+        test_rgb2yuv.cpp
+        test_common.cpp
+        test_utilities.h
+        test_quality.cpp
+    INCLUDES
+        ${CMAKE_CURRENT_BINARY_DIR}
+    LIBRARIES yuvconvert CxImage fmt
+    FOLDER tests/yuvconvert
 )
 
-set(YUVCONVERT_INTERFACE
-    include/yuvconvert.h
-)
 
-source_group(yuvconvert FILES
-    ${YUVCONVERT_SOURCE}
-    ${YUVCONVERT_INTERFACE}
-)
-
-add_library(yuvconvert STATIC
-    ${YUVCONVERT_SOURCE}
-    ${YUVCONVERT_INTERFACE}
-)
-
-target_include_directories(yuvconvert
-  PUBLIC
-    include
+target_compile_definitions(test_yuvconvert
   PRIVATE
-    include/yuvconvert
+    NOMINMAX
+    _UNICODE
+    UNICODE
 )
 
-target_link_libraries(yuvconvert
-  PUBLIC
-    static_math
-)
+#set_target_properties(test_cam_encoder PROPERTIES
+#    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+#    VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$(Configuration)
+#)
 
-#set_target_properties(yuvconvert PROPERTIES FOLDER "External/yuvconvert")
-add_subdirectory(tests)
-add_subdirectory(benchmark)
+#--gtest_catch_exceptions=0

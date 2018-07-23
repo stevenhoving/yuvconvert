@@ -21,23 +21,21 @@
 
 #pragma once
 
-namespace yuvconvert
+#include "simd_vec.h"
+
+// BT.601 Studio swing.
+namespace simd
 {
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
+// *y++ = ((66 * r1 + 129 * g1 + 25 * b1 + 128) >> 8) + 16;
+static const vec3 y_mul = simd::vec3_set(25, 129, 66);
 
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
+// *u++ = ((-38 * r1 + -74 * g1 + 112 * b1 + 128) >> 8) + 128;
+static const vec3 u_mul = simd::vec3_set(112, -74, -38);
 
-    enum class simd_mode
-    {
-        plain_c,
-        ssse3
-    };
+// *v++ = ((112 * r1 + -94 * g1 + -18 * b1 + 128) >> 8) + 128;
+static const vec3 v_mul = simd::vec3_set(-18, -94, 112);
 
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
+static const auto y_add = _mm_set1_epi8(16);
+static const auto uv_add = _mm_set1_epi16(128);
 
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
-} // namespace yuvconvert
+} // namespace simd

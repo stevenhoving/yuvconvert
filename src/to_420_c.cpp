@@ -20,7 +20,7 @@
  */
 
 #include "to_420_c.h"
-#include "yuv_common.h"
+#include "yuvconvert_common.h"
 
 // c implementation for converting a rgbx row to y
 template<int pixel_width>

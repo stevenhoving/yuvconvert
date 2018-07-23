@@ -21,23 +21,16 @@
 
 #pragma once
 
-namespace yuvconvert
+#include <windows.h>
+
+#pragma pack(1)
+struct rgb
 {
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
+    uint8_t r, g, b;
+};
 
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3]);
-
-    enum class simd_mode
-    {
-        plain_c,
-        ssse3
-    };
-
-    void bgr_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
-
-    void bgra_to_420(unsigned char *destination[3], const int dst_stride[3], const unsigned char *const source[3],
-        const int width, const int height, const int src_stride[3], simd_mode mode);
-} // namespace yuvconvert
+#pragma pack(1)
+struct rgba
+{
+    uint8_t r, g, b, a;
+};

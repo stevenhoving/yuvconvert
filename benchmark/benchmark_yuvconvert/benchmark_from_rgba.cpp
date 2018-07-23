@@ -27,12 +27,12 @@ class bgrx_to_420_fixture : public ::benchmark::Fixture
 public:
     void SetUp(const ::benchmark::State& state)
     {
-        width = state.range(0);
-        height = state.range(1);
+        width = static_cast<int>(state.range(0));
+        height = static_cast<int>(state.range(1));
         const auto total = width * height;
 
         rgb_buffer.resize(total * 4);
-        yuv420_buffer.resize(total * 3);
+        yuv420_buffer.resize(total * 2);
 
         source[0] = rgb_buffer.data();
         source_stride[0] = width * 4;
@@ -82,10 +82,28 @@ BENCHMARK_REGISTER_F(bgrx_to_420_fixture, bgra_to_420)
     ->Args({ 2048, 2048})
     ->Args({ 4096, 4096});
 
+BENCHMARK_DEFINE_F(bgrx_to_420_fixture, bgra_to_420_ssse3)(benchmark::State& st)
+{
+    for (auto _ : st) {
+        yuvconvert::bgra_to_420(destination, destination_stride, source, width, height,
+            source_stride, yuvconvert::simd_mode::ssse3);
+    }
+}
+
+BENCHMARK_REGISTER_F(bgrx_to_420_fixture, bgra_to_420_ssse3)
+    ->Args({ 128, 128 })
+    ->Args({ 256, 256 })
+    ->Args({ 512, 512 })
+    ->Args({ 1024, 1024 })
+    ->Args({ 2048, 2048 })
+    ->Args({ 4096, 4096 });
+
+
 BENCHMARK_DEFINE_F(bgrx_to_420_fixture, bgr_to_420)(benchmark::State& st)
 {
     for (auto _ : st) {
-        yuvconvert::bgr_to_420(destination, destination_stride, source, width, height, source_stride);
+        yuvconvert::bgr_to_420(destination, destination_stride, source, width, height,
+            source_stride, yuvconvert::simd_mode::plain_c);
     }
 }
 
@@ -97,20 +115,18 @@ BENCHMARK_REGISTER_F(bgrx_to_420_fixture, bgr_to_420)
     ->Args({ 2048, 2048 })
     ->Args({ 4096, 4096 });
 
-#if 0
-BENCHMARK_DEFINE_F(bgrx_to_420_fixture, bgra2yuv420p_sse)(benchmark::State& st)
+BENCHMARK_DEFINE_F(bgrx_to_420_fixture, bgr_to_420_ssse3)(benchmark::State& st)
 {
     for (auto _ : st) {
-        bgra2yuv420p_sse(destination, destination_stride, source, width, height, source_stride);
+        yuvconvert::bgr_to_420(destination, destination_stride, source, width, height,
+            source_stride, yuvconvert::simd_mode::ssse3);
     }
 }
 
-BENCHMARK_REGISTER_F(bgrx_to_420_fixture, bgra2yuv420p_sse)
-    ->Args({ 128, 128})
-    ->Args({ 256, 256})
-    ->Args({ 512, 512})
-    ->Args({ 1024, 1024})
-    ->Args({ 2048, 2048})
-    ->Args({ 4096, 4096});
-
-#endif
+BENCHMARK_REGISTER_F(bgrx_to_420_fixture, bgr_to_420_ssse3)
+    ->Args({ 128, 128 })
+    ->Args({ 256, 256 })
+    ->Args({ 512, 512 })
+    ->Args({ 1024, 1024 })
+    ->Args({ 2048, 2048 })
+    ->Args({ 4096, 4096 });

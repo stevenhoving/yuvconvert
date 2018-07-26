@@ -22,7 +22,6 @@
 #include <gtest/gtest.h>
 #include <yuvconvert.h>
 #include <yuvconvert/yuvconvert_common.h>
-#include <ximage.h>
 #include "test_utilities.h"
 #include <fmt/printf.h>
 #include <vector>
@@ -201,7 +200,7 @@ double ComputePSNR(double sse, double size) {
     return 10.0 * log10(255.0 * 255.0 * size / sse);
 }
 
-
+#if 0
 TEST(test_quality, psnr)
 {
     CxImage test;
@@ -276,3 +275,4 @@ TEST(test_quality, psnr)
     const auto psnr_b = ComputePSNR(sse_b, (int)rgb_b.size());
     fmt::print("psnr b: {} sse: {}\n", psnr_b, sse_b);
 }
+#endif

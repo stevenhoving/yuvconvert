@@ -26,6 +26,8 @@
 
 #include <static_math/cmath.h>
 
+#define AVG_PROX(a,b) (((((a) ^ (b)) & 0xFEFEFEFE) >> 1) + ((a) & (b)))
+
 /* \note the idea behind this clamp function is good, but there is room for improvement. */
 template<typename ClampType, typename ValueType>
 static constexpr ClampType clamp(ValueType value)
@@ -66,6 +68,8 @@ Cb = U = -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128
 
 */
 
+
+
 struct fixed_point
 {
 };
@@ -82,6 +86,17 @@ public:
     static constexpr auto to_u(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t;
     static constexpr auto to_v(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t;
 };
+
+// BT.601 (SDTV)
+//constexpr auto Wr = 0.299;
+//constexpr auto Wb = 0.114;
+//constexpr auto Wg = 1 - Wr - Wb;
+//constexpr auto Umax = 0.436;
+//constexpr auto Vmax = 0.615;
+//
+//constexpr auto U = (Umax / (1.0 - Wb)); // * (B - Y_);
+//constexpr auto V = (Vmax / (1.0 - Wr)); // * (R - Y_);
+
 
 // ITU-R BT.601 standard.
 constexpr std::array<double, 3> luma_factor = { 0.2569, 0.5044, 0.0979 };
@@ -107,14 +122,14 @@ constexpr auto chroma_u_b_factor = (int)smath::round(chroma_u_factor[2] * (1 << 
 
 // fixed point specialization.
 template<>
-static constexpr auto rgbconvert<fixed_point>::to_y(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<fixed_point>::to_y(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     const auto luma = (luma_r_factor * r) + (luma_g_factor * g) + (luma_b_factor * b);
     return (luma + fixed_point_half + (16 << fixed_point_precision)) >> fixed_point_precision;
 }
 
 template<>
-static constexpr auto rgbconvert<fixed_point>::to_u(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<fixed_point>::to_u(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     //return ((-38 * r + -74 * g + 112 * b + 128) >> 8) + 128;
     //return ((-38 * static_cast<int>(r) + -74 * static_cast<int>(g) + 112 * static_cast<int>(b) + 128) >> 8) + 128;
@@ -125,7 +140,7 @@ static constexpr auto rgbconvert<fixed_point>::to_u(const uint8_t r, const uint8
 }
 
 template<>
-static constexpr auto rgbconvert<fixed_point>::to_v(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<fixed_point>::to_v(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     //return ((112 * r + -94 * g + -18 * b + 128) >> 8) + 128;
     return ((112 * static_cast<int>(r) + -94 * static_cast<int>(g) + -18 * static_cast<int>(b) + 128) >> 8) + 128;
@@ -134,21 +149,21 @@ static constexpr auto rgbconvert<fixed_point>::to_v(const uint8_t r, const uint8
 // floating point specialization
 
 template<>
-static constexpr auto rgbconvert<floating_point>::to_y(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<floating_point>::to_y(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     const auto y = (luma_factor[0] * r) + (luma_factor[1] * g) + (luma_factor[2] * b) + 16;
     return static_cast<uint8_t>(std::clamp(y, 0.0, 255.0));
 }
 
 template<>
-static constexpr auto rgbconvert<floating_point>::to_u(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<floating_point>::to_u(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     const auto u = (chroma_u_factor[0] * r) - (chroma_u_factor[1] * g) + (chroma_u_factor[2] * b) + 128;
     return static_cast<uint8_t>(std::clamp(u, 0.0, 255.0));
 }
 
 template<>
-static constexpr auto rgbconvert<floating_point>::to_v(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
+constexpr auto rgbconvert<floating_point>::to_v(const uint8_t r, const uint8_t g, const uint8_t b) -> uint8_t
 {
     const auto v = (0.615 * r) - (0.51499 * g) - (0.10001 * b) + 128;
     return static_cast<uint8_t>(std::clamp(v, 0.0, 255.0));
@@ -190,7 +205,7 @@ static constexpr auto rgb2v(const uint8_t r, const uint8_t g, const uint8_t b) -
 //G = clip((298 * C - 100 * D - 208 * E + 128) >> 8)
 //B = clip((298 * C + 516 * D + 128) >> 8)
 
-static constexpr auto yuv2r(const uint8_t y, const uint8_t u, const uint8_t v) -> uint8_t
+static constexpr auto yuv2r(const uint8_t y, const uint8_t /*u*/, const uint8_t v) -> uint8_t
 {
     return clamp<uint8_t>((298 * (y - 16) + 409 * (v - 128) + 128) >> 8);
     //const auto r = 1.164 * (int(y) - 16) + 1.596 * (int(v) - 128);
@@ -204,7 +219,7 @@ static constexpr auto yuv2g(const uint8_t y, const uint8_t u, const uint8_t v) -
     //return static_cast<uint8_t>(std::clamp(g, 0.0, 255.0));
 }
 
-static constexpr auto yuv2b(const uint8_t y, const uint8_t u, const uint8_t v) -> uint8_t
+static constexpr auto yuv2b(const uint8_t y, const uint8_t u, const uint8_t /*v*/) -> uint8_t
 {
     return clamp<uint8_t>((298 * (y - 16) + 516 * (u - 128) + 128) >> 8);
     //const auto b = 1.164 * (int(y) - 16) + 2.018 * (int(u) - 128);

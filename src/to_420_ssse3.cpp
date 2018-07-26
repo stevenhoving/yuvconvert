@@ -64,7 +64,6 @@ static const auto uv_shuffle2 = _mm_set_epi8(
     mask, mask, mask, mask
 );
 
-static const vec3 uv_shuffle = { uv_shuffle0, uv_shuffle1, uv_shuffle2 };
 static const vec2 vec2_uv_shuffle = { uv_shuffle0, uv_shuffle1 };
 } // namespace bgra
 
@@ -88,8 +87,6 @@ static const auto y_shuffle2 = _mm_set_epi8(mask,
     mask, mask, mask, mask, mask,
     mask, mask, mask, mask, mask);
 
-static const vec3 y_shuffle = { y_shuffle0, y_shuffle1, y_shuffle2 };
-
 static const auto y_shuffle0_lo_odd = _mm_set_epi8(
     mask, mask, mask, mask, mask, mask, mask, mask,
     15, 13, 11, 9, 7, 5, 3, 1);
@@ -102,8 +99,6 @@ static const auto y_shuffle1_lo_odd = _mm_set_epi8(
 static const auto y_shuffle2_lo_odd = _mm_set_epi8(
     mask, mask, mask, mask, mask, mask, mask, mask,
     15, 13, 11, 9, 7, 5, 3, 1);
-
-static const vec3 y_shuffle_lo_odd = { y_shuffle0_lo_odd, y_shuffle1_lo_odd, y_shuffle2_lo_odd };
 
 static const vec2 vec2_y_shuffle_lo_odd = { y_shuffle0_lo_odd, y_shuffle1_lo_odd };
 
@@ -124,8 +119,6 @@ static const auto y_shuffle2_hi_odd = _mm_set_epi8(
     15, 12, 11, 9,
     mask, mask, mask, mask,
     mask, mask, mask, mask);
-
-static const vec3 y_shuffle_hi_odd = { y_shuffle0_hi_odd, y_shuffle1_hi_odd, y_shuffle2_hi_odd };
 
 static const auto uv_shuffle0 = _mm_set_epi8(
     mask, mask, mask, mask,
@@ -148,7 +141,6 @@ static const auto uv_shuffle2 = _mm_set_epi8(
     mask, mask, mask, mask
 );
 
-static const vec3 uv_shuffle = { uv_shuffle0, uv_shuffle1, uv_shuffle2 };
 static const vec2 vec2_uv_shuffle = { uv_shuffle0, uv_shuffle1 };
 
 static const auto uv_shuffle_interleave0 = _mm_set_epi8(
@@ -162,8 +154,6 @@ static const auto uv_shuffle_interleave1 = _mm_set_epi8(
 static const auto uv_shuffle_interleave2 = _mm_set_epi8(
     mask, 12, mask, 8, mask, 4, mask, 0,
     mask, mask, mask, mask, mask, mask, mask, mask);
-
-static const vec3 uv_interleave = { uv_shuffle_interleave0, uv_shuffle_interleave1, uv_shuffle_interleave2 };
 
 } // namespace bgr
 } // namespace simd

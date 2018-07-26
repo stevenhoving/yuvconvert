@@ -29,10 +29,9 @@ add_unit_test_suite(
         test_quality.cpp
     INCLUDES
         ${CMAKE_CURRENT_BINARY_DIR}
-    LIBRARIES yuvconvert CxImage fmt
+    LIBRARIES yuvconvert fmt
     FOLDER tests/yuvconvert
 )
-
 
 target_compile_definitions(test_yuvconvert
   PRIVATE
